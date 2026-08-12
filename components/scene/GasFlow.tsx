@@ -8,7 +8,7 @@ import { valveMotion } from "@/lib/engine-motion";
 import manifest from "@/lib/generated/inline-four-manifest.json";
 import { useEngineStore } from "@/lib/store";
 
-const PARTICLE_COUNT = 7;
+const PARTICLE_COUNT = 12;
 
 function FlowPath({
   cylinder,
@@ -28,8 +28,10 @@ function FlowPath({
               new THREE.Vector3(x, 2.38, 1.15),
               new THREE.Vector3(x, 2.2, 0.62),
               new THREE.Vector3(x, 2.02, 0.18),
+              new THREE.Vector3(x, 1.86, 0),
             ]
           : [
+              new THREE.Vector3(x, 1.86, 0),
               new THREE.Vector3(x, 2.02, -0.18),
               new THREE.Vector3(x, 2.2, -0.62),
               new THREE.Vector3(x, 2.38, -1.15),
@@ -41,6 +43,7 @@ function FlowPath({
   const particles = useRef<THREE.InstancedMesh>(null);
   const pathMaterial = useRef<THREE.MeshStandardMaterial>(null);
   const valveGlow = useRef<THREE.Mesh>(null);
+  const statusLabel = useRef<HTMLSpanElement>(null);
   const marker = useMemo(() => new THREE.Object3D(), []);
   const colour = intake ? "#55b8ae" : "#d47751";
 
@@ -59,12 +62,15 @@ function FlowPath({
       : (localAngle - 540) / 180;
 
     if (pathMaterial.current) {
-      pathMaterial.current.opacity = active ? 0.78 : 0.14;
-      pathMaterial.current.emissiveIntensity = active ? 1.25 : 0.08;
+      pathMaterial.current.opacity = active ? 1 : 0.06;
+      pathMaterial.current.emissiveIntensity = active ? 2.4 : 0.04;
     }
     if (valveGlow.current) {
       valveGlow.current.visible = active;
-      valveGlow.current.scale.setScalar(0.12 + lift * 0.36);
+      valveGlow.current.scale.setScalar(0.18 + lift * 0.5);
+    }
+    if (intake && statusLabel.current) {
+      statusLabel.current.style.opacity = active ? "1" : "0";
     }
     if (!particles.current) return;
 
@@ -81,16 +87,17 @@ function FlowPath({
 
   return (
     <group>
-      <mesh>
-        <tubeGeometry args={[curve, 40, 0.022, 6, false]} />
+      <mesh renderOrder={4}>
+        <tubeGeometry args={[curve, 40, 0.038, 6, false]} />
         <meshStandardMaterial
           ref={pathMaterial}
           color={colour}
           emissive={colour}
           emissiveIntensity={0.08}
           transparent
-          opacity={0.14}
+          opacity={0.06}
           depthWrite={false}
+          depthTest={false}
         />
       </mesh>
       <instancedMesh
@@ -98,8 +105,8 @@ function FlowPath({
         args={[undefined, undefined, PARTICLE_COUNT]}
         frustumCulled={false}
       >
-        <sphereGeometry args={[0.055, 8, 8]} />
-        <meshBasicMaterial color={colour} toneMapped={false} />
+        <sphereGeometry args={[0.075, 8, 8]} />
+        <meshBasicMaterial color={colour} toneMapped={false} depthTest={false} />
       </instancedMesh>
       <mesh ref={valveGlow} position={[x, 2.02, z * 0.18]} visible={false}>
         <sphereGeometry args={[1, 12, 8]} />
@@ -111,6 +118,21 @@ function FlowPath({
           blending={THREE.AdditiveBlending}
         />
       </mesh>
+      {intake && (
+        <Html
+          position={[x, 2.86, 0.72]}
+          center
+          distanceFactor={9}
+          style={{ pointerEvents: "none" }}
+        >
+          <span
+            ref={statusLabel}
+            className="block whitespace-nowrap rounded-full border border-[#347c75] bg-[#e9faf6]/95 px-2.5 py-1 font-mono text-[0.58rem] font-bold tracking-[0.12em] text-[#286b65] opacity-0 shadow-lg transition-opacity duration-150"
+          >
+            AIR IN · CYL {cylinder + 1}
+          </span>
+        </Html>
+      )}
     </group>
   );
 }
