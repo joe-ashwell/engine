@@ -9,7 +9,11 @@ import { GasFlow } from "@/components/scene/GasFlow";
 import { Hotspot } from "@/components/scene/Hotspot";
 import { valveMotion } from "@/lib/engine-motion";
 import manifest from "@/lib/generated/inline-four-manifest.json";
-import { useEngineStore } from "@/lib/store";
+import {
+  getPlayhead,
+  setPlayhead,
+  useEngineStore,
+} from "@/lib/store";
 
 type CadNodeName =
   | "BlockFull"
@@ -60,6 +64,30 @@ const CAD_COLOURS: Record<CadNodeName, string> = {
 };
 
 const UP = new THREE.Vector3(0, 1, 0);
+const ROD_START = new THREE.Vector3();
+const ROD_END = new THREE.Vector3();
+const ROD_DIRECTION = new THREE.Vector3();
+const ROD_MIDDLE = new THREE.Vector3();
+const UI_SYNC_INTERVAL_SECONDS = 1 / 12;
+const SHADOW_CASTERS = new Set<CadNodeName>([
+  "BlockFull",
+  "BlockCutaway",
+  "HeadFull",
+  "HeadCutaway",
+  "SumpFull",
+  "SumpCutaway",
+  "Piston",
+  "Rod",
+  "Crankshaft",
+  "Flywheel",
+]);
+const SHADOW_RECEIVERS = new Set<CadNodeName>([
+  ...SHADOW_CASTERS,
+  "LinersFull",
+  "LinersCutaway",
+  "IntakeManifold",
+  "ExhaustManifold",
+]);
 const {
   crankRadius,
   rodLength,
@@ -115,8 +143,8 @@ function CadMesh({
       dispose={null}
       frustumCulled={false}
       visible={visible}
-      castShadow
-      receiveShadow
+      castShadow={SHADOW_CASTERS.has(name)}
+      receiveShadow={SHADOW_RECEIVERS.has(name)}
     >
       <meshStandardMaterial
         color={CAD_COLOURS[name]}
@@ -143,14 +171,22 @@ export function Engine() {
   const head = useRef<THREE.Group>(null);
   const sump = useRef<THREE.Group>(null);
   const liners = useRef<THREE.Group>(null);
+  const lastUiSync = useRef(0);
 
-  useFrame((_, rawDelta) => {
+  useFrame(({ clock }, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
     const state = useEngineStore.getState();
-    let angle = state.angle;
+    let angle = getPlayhead();
     if (state.playing) {
       angle = (angle + delta * 90 * state.speed) % 720;
-      useEngineStore.setState({ angle });
+      setPlayhead(angle);
+      if (
+        clock.elapsedTime - lastUiSync.current >=
+        UI_SYNC_INTERVAL_SECONDS
+      ) {
+        lastUiSync.current = clock.elapsedTime;
+        useEngineStore.setState({ angle });
+      }
     }
 
     const crankAngle = THREE.MathUtils.degToRad(angle);
@@ -180,21 +216,21 @@ export function Engine() {
       }
 
       if (rod) {
-        const start = new THREE.Vector3(x, pinY, pinZ);
-        const end = new THREE.Vector3(x, pistonY, 0);
-        const direction = end.clone().sub(start);
-        const middle = start.clone().add(end).multiplyScalar(0.5);
+        ROD_START.set(x, pinY, pinZ);
+        ROD_END.set(x, pistonY, 0);
+        ROD_DIRECTION.subVectors(ROD_END, ROD_START);
+        ROD_MIDDLE.addVectors(ROD_START, ROD_END).multiplyScalar(0.5);
         rod.position.set(
-          middle.x,
-          middle.y,
+          ROD_MIDDLE.x,
+          ROD_MIDDLE.y,
           THREE.MathUtils.damp(
             rod.position.z,
-            middle.z + (explode ? 1.5 : 0),
+            ROD_MIDDLE.z + (explode ? 1.5 : 0),
             9,
             delta,
           ),
         );
-        rod.quaternion.setFromUnitVectors(UP, direction.normalize());
+        rod.quaternion.setFromUnitVectors(UP, ROD_DIRECTION.normalize());
       }
 
       const localAngle =

@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { valveMotion } from "@/lib/engine-motion";
 import manifest from "@/lib/generated/inline-four-manifest.json";
-import { useEngineStore } from "@/lib/store";
+import { getPlayhead } from "@/lib/store";
 
 const PARTICLE_COUNT = 12;
 
@@ -44,11 +44,12 @@ function FlowPath({
   const pathMaterial = useRef<THREE.MeshStandardMaterial>(null);
   const valveGlow = useRef<THREE.Mesh>(null);
   const statusLabel = useRef<HTMLSpanElement>(null);
+  const particlesWereActive = useRef(false);
   const marker = useMemo(() => new THREE.Object3D(), []);
   const colour = intake ? "#55b8ae" : "#d47751";
 
   useFrame(() => {
-    const angle = useEngineStore.getState().angle;
+    const angle = getPlayhead();
     const localAngle =
       (angle + manifest.firingOffsets[cylinder]) % 720;
     const lift = valveMotion(
@@ -73,12 +74,23 @@ function FlowPath({
       statusLabel.current.style.opacity = active ? "1" : "0";
     }
     if (!particles.current) return;
+    if (!active) {
+      if (particlesWereActive.current) {
+        particles.current.visible = false;
+        particlesWereActive.current = false;
+      }
+      return;
+    }
+    if (!particlesWereActive.current) {
+      particles.current.visible = true;
+      particlesWereActive.current = true;
+    }
 
     for (let index = 0; index < PARTICLE_COUNT; index += 1) {
       const t = (progress + index / PARTICLE_COUNT) % 1;
       const point = curve.getPointAt(Math.max(0, t));
       marker.position.copy(point);
-      marker.scale.setScalar(active ? 1 : 0.001);
+      marker.scale.setScalar(1);
       marker.updateMatrix();
       particles.current.setMatrixAt(index, marker.matrix);
     }
@@ -104,6 +116,7 @@ function FlowPath({
         ref={particles}
         args={[undefined, undefined, PARTICLE_COUNT]}
         frustumCulled={false}
+        visible={false}
       >
         <sphereGeometry args={[0.075, 8, 8]} />
         <meshBasicMaterial color={colour} toneMapped={false} depthTest={false} />

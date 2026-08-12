@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import manifest from "@/lib/generated/inline-four-manifest.json";
-import { useEngineStore } from "@/lib/store";
+import { getPlayhead } from "@/lib/store";
 
 export function CombustionEffects() {
   const gasRefs = useRef<THREE.Mesh[]>([]);
@@ -18,7 +18,7 @@ export function CombustionEffects() {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useFrame(() => {
-    const angle = useEngineStore.getState().angle;
+    const angle = getPlayhead();
 
     manifest.cylinderX.forEach((_, cylinder) => {
       const gas = gasRefs.current[cylinder];

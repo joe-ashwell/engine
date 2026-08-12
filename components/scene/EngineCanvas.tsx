@@ -20,7 +20,7 @@ function Scene() {
         castShadow
         position={[6, 9, 7]}
         intensity={2.4}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0002}
       />
       <spotLight
@@ -86,7 +86,6 @@ export function EngineCanvas() {
       gl={{
         antialias: true,
         alpha: false,
-        localClippingEnabled: true,
         outputColorSpace: THREE.SRGBColorSpace,
       }}
       onPointerMissed={() => selectPart(null)}
