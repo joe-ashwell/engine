@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #eeeae1;
+  --foreground: #292621;
 }
 
 @theme inline {
@@ -12,15 +12,197 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hotspot {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  border: 0;
+  background: transparent;
+  color: #37332e;
+  white-space: nowrap;
+  outline: none;
+}
+
+.hotspot__dot {
+  position: relative;
+  display: block;
+  width: 0.58rem;
+  height: 0.58rem;
+  border: 2px solid #faf8f3;
+  border-radius: 999px;
+  background: #546d66;
+  box-shadow: 0 2px 8px rgb(34 31 27 / 20%);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.hotspot__dot::after {
+  position: absolute;
+  inset: -0.34rem;
+  border: 1px solid rgb(84 109 102 / 35%);
+  border-radius: inherit;
+  content: "";
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.hotspot__leader {
+  width: 1.15rem;
+  height: 1px;
+  margin-left: -0.42rem;
+  background: rgb(55 51 46 / 45%);
+  opacity: 0;
+  transform: scaleX(0.55);
+  transform-origin: left;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.hotspot__label {
+  border: 1px solid rgb(41 38 33 / 10%);
+  border-radius: 999px;
+  background: rgb(250 248 243 / 94%);
+  padding: 0.3rem 0.55rem;
+  box-shadow: 0 6px 18px rgb(34 31 27 / 10%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateX(-0.2rem);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.hotspot:hover .hotspot__dot,
+.hotspot:focus-visible .hotspot__dot,
+.hotspot--selected .hotspot__dot {
+  background: #263a34;
+  transform: scale(1.22);
+}
+
+.hotspot:hover .hotspot__dot::after,
+.hotspot:focus-visible .hotspot__dot::after,
+.hotspot--selected .hotspot__dot::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hotspot:hover .hotspot__label,
+.hotspot:focus-visible .hotspot__label,
+.hotspot--selected .hotspot__label,
+.hotspot--always-visible .hotspot__label,
+.hotspot--always-visible .hotspot__leader {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.hotspot:hover .hotspot__leader,
+.hotspot:focus-visible .hotspot__leader,
+.hotspot--selected .hotspot__leader {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.hotspot:focus-visible .hotspot__label {
+  outline: 2px solid #5f7771;
+  outline-offset: 2px;
+}
+
+.flow-label {
+  display: block;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: rgb(250 248 243 / 92%);
+  padding: 0.24rem 0.44rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  box-shadow: 0 4px 14px rgb(34 31 27 / 12%);
+}
+
+.flow-label--intake {
+  color: #397a74;
+}
+
+.flow-label--exhaust {
+  color: #9b4f35;
+}
+
+.cycle-range {
+  height: 1.25rem;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.cycle-range::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(41 38 33 / 16%);
+}
+
+.cycle-range::-webkit-slider-thumb {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: -0.4rem;
+  appearance: none;
+  border: 3px solid #faf8f3;
+  border-radius: 999px;
+  background: #526b64;
+  box-shadow: 0 1px 5px rgb(35 31 27 / 28%);
+}
+
+.cycle-range::-moz-range-track {
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(41 38 33 / 16%);
+}
+
+.cycle-range::-moz-range-thumb {
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 3px solid #faf8f3;
+  border-radius: 999px;
+  background: #526b64;
+  box-shadow: 0 1px 5px rgb(35 31 27 / 28%);
+}
+
+.cycle-range:focus-visible {
+  outline: 2px solid #5f7771;
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

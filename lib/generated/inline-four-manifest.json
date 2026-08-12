@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "model": "/models/inline-four-engine.glb",
+  "dimensions": {
+    "bore": 1.18,
+    "stroke": 1.3,
+    "crankRadius": 0.65,
+    "rodLength": 2.5,
+    "pistonHeight": 0.74,
+    "crankY": -1.55,
+    "deckY": 2.1,
+    "valveClosedY": 2.5,
+    "valveLift": 0.24,
+    "cylinderSpacing": 1.55
+  },
+  "cylinderX": [
+    -2.325,
+    -0.775,
+    0.775,
+    2.325
+  ],
+  "crankPhases": [
+    0,
+    180,
+    180,
+    0
+  ],
+  "firingOffsets": [
+    0,
+    180,
+    540,
+    360
+  ],
+  "triangleCount": 86200,
+  "hotspots": {
+    "piston": [
+      -2.325,
+      1.25,
+      0.55
+    ],
+    "connecting-rod": [
+      -2.325,
+      -0.35,
+      0.62
+    ],
+    "crankshaft": [
+      0,
+      -1.55,
+      0.72
+    ],
+    "crank-journal": [
+      -0.775,
+      -1.6500000000000001,
+      0.66
+    ],
+    "counterweight": [
+      1.155,
+      -1.97,
+      0.25
+    ],
+    "intake-valve": [
+      -0.775,
+      2.55,
+      0.52
+    ],
+    "exhaust-valve": [
+      0.775,
+      2.55,
+      -0.52
+    ],
+    "intake-manifold": [
+      0,
+      2.38,
+      1.74
+    ],
+    "exhaust-manifold": [
+      0,
+      2.38,
+      -1.74
+    ],
+    "cylinder-block": [
+      3.2,
+      0.4,
+      0.65
+    ],
+    "spark-plug": [
+      -2.325,
+      2.72,
+      0
+    ],
+    "camshaft": [
+      0,
+      3.02,
+      0.48
+    ],
+    "flywheel": [
+      -4.05,
+      -1.55,
+      0
+    ]
+  }
+}
