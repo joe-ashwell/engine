@@ -8,23 +8,6 @@ import { Toolbar } from "@/components/ui/Toolbar";
 export function Explorer() {
   return (
     <main className="relative min-h-[100svh] overflow-hidden bg-[#eeeae1] text-[#292621]">
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
-        <a
-          href="#explorer"
-          className="pointer-events-auto flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5f7771]"
-          aria-label="Mechanica home"
-        >
-          <span className="grid size-8 place-items-center rounded-full border border-[#8a8277]/40 font-serif text-sm">
-            M
-          </span>
-          <span className="font-serif text-lg tracking-tight">Mechanica</span>
-        </a>
-        <div className="hidden items-center gap-2 font-mono text-[0.6rem] tracking-[0.16em] text-[#7c746a] uppercase sm:flex">
-          <span className="size-1.5 rounded-full bg-[#6d8880]" />
-          Free learning tool
-        </div>
-      </header>
-
       <section
         id="explorer"
         className="absolute inset-0"
@@ -35,7 +18,7 @@ export function Explorer() {
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-50">
-          <div className="absolute top-[5.3rem] left-5 max-w-[16rem] sm:top-[6.8rem] sm:left-8 sm:max-w-[20rem]">
+          <div className="absolute top-5 left-5 max-w-[16rem] sm:top-8 sm:left-8 sm:max-w-[20rem]">
             <p className="mb-2 font-mono text-[0.6rem] tracking-[0.2em] text-[#827a70] uppercase">
               Machine study · 001
             </p>

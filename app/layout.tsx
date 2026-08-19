@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mechanica — Inline-Four Engine Explorer",
+  title: "Inline-Four Engine Explorer",
   description:
     "Explore a moving inline-four engine and learn how each part works.",
 };
