@@ -6,7 +6,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { valveMotion } from "@/lib/engine-motion";
 import manifest from "@/lib/generated/inline-four-manifest.json";
-import { getPlayhead } from "@/lib/store";
+import { getPlayhead, useEngineStore } from "@/lib/store";
 
 const PARTICLE_COUNT = 12;
 
@@ -71,7 +71,8 @@ function FlowPath({
       valveGlow.current.scale.setScalar(0.18 + lift * 0.5);
     }
     if (intake && statusLabel.current) {
-      statusLabel.current.style.opacity = active ? "1" : "0";
+      const showLabels = useEngineStore.getState().showLabels;
+      statusLabel.current.style.opacity = active && showLabels ? "1" : "0";
     }
     if (!particles.current) return;
     if (!active) {
@@ -136,6 +137,7 @@ function FlowPath({
           position={[x, 2.86, 0.72]}
           center
           distanceFactor={9}
+          zIndexRange={[8, 0]}
           style={{ pointerEvents: "none" }}
         >
           <span
@@ -151,6 +153,8 @@ function FlowPath({
 }
 
 export function GasFlow() {
+  const showLabels = useEngineStore((state) => state.showLabels);
+
   return (
     <group>
       {manifest.cylinderX.map((_, cylinder) => (
@@ -159,22 +163,28 @@ export function GasFlow() {
           <FlowPath cylinder={cylinder} intake={false} />
         </group>
       ))}
-      <Html
-        position={[4.35, 2.4, 1.75]}
-        center
-        distanceFactor={9}
-        style={{ pointerEvents: "none" }}
-      >
-        <span className="flow-label flow-label--intake">IN</span>
-      </Html>
-      <Html
-        position={[4.35, 2.4, -1.75]}
-        center
-        distanceFactor={9}
-        style={{ pointerEvents: "none" }}
-      >
-        <span className="flow-label flow-label--exhaust">OUT</span>
-      </Html>
+      {showLabels && (
+        <>
+          <Html
+            position={[4.35, 2.4, 1.75]}
+            center
+            distanceFactor={9}
+            zIndexRange={[8, 0]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span className="flow-label flow-label--intake">IN</span>
+          </Html>
+          <Html
+            position={[4.35, 2.4, -1.75]}
+            center
+            distanceFactor={9}
+            zIndexRange={[8, 0]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span className="flow-label flow-label--exhaust">OUT</span>
+          </Html>
+        </>
+      )}
     </group>
   );
 }

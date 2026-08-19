@@ -23,6 +23,13 @@ D = {
     "valveClosedY": 2.5,
     "valveLift": 0.24,
     "cylinderSpacing": 1.55,
+    "timingGearTeeth": 20,
+    "pistonPinAxis": "x",
+    "pistonPinRadius": 0.085,
+    "pistonPinHoleRadius": 0.105,
+    "rodSmallEndBoreRadius": 0.095,
+    "crankPinRadius": 0.16,
+    "rodBigEndBoreRadius": 0.17,
 }
 
 CYLINDER_X = [-2.325, -0.775, 0.775, 2.325]
@@ -122,7 +129,8 @@ def make_piston():
     piston += Pos(0, 0, D["pistonHeight"] / 2) * Cylinder(
         D["bore"] / 2 - 0.045, 0.08, align=CENTER
     )
-    piston -= axis_y_cylinder(0.095, 1.4)
+    piston -= axis_x_cylinder(D["pistonPinHoleRadius"], 1.4)
+    piston += axis_x_cylinder(D["pistonPinRadius"], 0.82)
     for z in (0.19, 0.29):
         piston += Pos(0, 0, z) * Torus(D["bore"] / 2 - 0.055, 0.018)
     return piston
@@ -132,10 +140,12 @@ def make_rod():
     length = D["rodLength"]
     rod = Box(0.23, 0.16, length - 0.55, align=CENTER)
     big_end = Pos(0, 0, -length / 2) * (
-        axis_y_cylinder(0.24, 0.2) - axis_y_cylinder(0.12, 0.3)
+        axis_x_cylinder(0.24, 0.28)
+        - axis_x_cylinder(D["rodBigEndBoreRadius"], 0.38)
     )
     small_end = Pos(0, 0, length / 2) * (
-        axis_y_cylinder(0.16, 0.2) - axis_y_cylinder(0.08, 0.3)
+        axis_x_cylinder(0.16, 0.28)
+        - axis_x_cylinder(D["rodSmallEndBoreRadius"], 0.38)
     )
     return rod + big_end + small_end
 
@@ -153,7 +163,7 @@ def make_crankshaft():
     for index, x in enumerate(CYLINDER_X):
         phase = 1 if index in (0, 3) else -1
         pin_z = phase * D["crankRadius"]
-        crank += Pos(x, 0, pin_z) * axis_x_cylinder(0.16, 0.76)
+        crank += Pos(x, 0, pin_z) * axis_x_cylinder(D["crankPinRadius"], 0.76)
         for offset in (-0.38, 0.38):
             web_x = x + offset
             crank += Pos(web_x, 0, pin_z / 2) * Box(
@@ -199,14 +209,40 @@ def make_camshaft(exhaust: bool):
     return cam
 
 
-def make_timing_gear():
-    gear = axis_x_cylinder(0.55, 0.14)
-    gear -= axis_x_cylinder(0.11, 0.24)
-    for angle in range(0, 360, 30):
-        y = np.sin(np.deg2rad(angle)) * 0.48
-        z = np.cos(np.deg2rad(angle)) * 0.48
-        gear += Pos(0, y, z) * Box(0.16, 0.11, 0.11, align=CENTER)
+def make_spur_gear(
+    teeth: int,
+    root_radius: float,
+    outer_radius: float,
+    thickness: float,
+    bore_radius: float,
+):
+    gear = axis_x_cylinder(root_radius, thickness)
+    tooth_depth = outer_radius - root_radius
+    tooth_radius = root_radius + tooth_depth / 2
+    tooth_width = 2 * np.pi * root_radius / teeth * 0.56
+    for angle in np.linspace(0, 360, teeth, endpoint=False):
+        radians = np.deg2rad(angle)
+        y = np.sin(radians) * tooth_radius
+        z = np.cos(radians) * tooth_radius
+        tooth = Box(
+            thickness + 0.02,
+            tooth_width,
+            tooth_depth + 0.025,
+            align=CENTER,
+        )
+        gear += Pos(0, y, z) * Rot(-angle, 0, 0) * tooth
+    gear -= axis_x_cylinder(bore_radius, thickness + 0.12)
     return gear
+
+
+def make_timing_gear():
+    return make_spur_gear(
+        teeth=D["timingGearTeeth"],
+        root_radius=0.48,
+        outer_radius=0.63,
+        thickness=0.16,
+        bore_radius=0.11,
+    )
 
 
 def shape_to_mesh(shape, name: str):

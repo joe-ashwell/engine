@@ -8,7 +8,7 @@ import { Toolbar } from "@/components/ui/Toolbar";
 export function Explorer() {
   return (
     <main className="relative min-h-[100svh] overflow-hidden bg-[#eeeae1] text-[#292621]">
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6">
         <a
           href="#explorer"
           className="pointer-events-auto flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5f7771]"
@@ -34,7 +34,7 @@ export function Explorer() {
           <EngineCanvas />
         </div>
 
-        <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="pointer-events-none absolute inset-0 z-50">
           <div className="absolute top-[5.3rem] left-5 max-w-[16rem] sm:top-[6.8rem] sm:left-8 sm:max-w-[20rem]">
             <p className="mb-2 font-mono text-[0.6rem] tracking-[0.2em] text-[#827a70] uppercase">
               Machine study · 001
@@ -61,7 +61,7 @@ export function Explorer() {
             <PartPanel compact />
           </div>
 
-          <div className="absolute right-8 top-1/2 hidden -translate-y-1/2 lg:block">
+          <div className="absolute right-8 bottom-6 hidden max-h-[calc(100svh-12.5rem)] overflow-y-auto lg:block">
             <PartPanel />
           </div>
 

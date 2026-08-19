@@ -22,6 +22,10 @@ type EngineState = {
   cutaway: boolean;
   exploded: boolean;
   autoRotate: boolean;
+  showLabels: boolean;
+  showCombustion: boolean;
+  showAirflow: boolean;
+  showPrimer: boolean;
   resetViewKey: number;
   setAngle: (angle: number) => void;
   setPlaying: (playing: boolean) => void;
@@ -30,6 +34,10 @@ type EngineState = {
   toggleCutaway: () => void;
   toggleExploded: () => void;
   toggleAutoRotate: () => void;
+  toggleLabels: () => void;
+  toggleCombustion: () => void;
+  toggleAirflow: () => void;
+  dismissPrimer: () => void;
   reset: () => void;
 };
 
@@ -37,10 +45,14 @@ export const useEngineStore = create<EngineState>((set) => ({
   angle: INITIAL_ANGLE,
   playing: true,
   speed: 1,
-  selectedPart: "piston",
+  selectedPart: null,
   cutaway: true,
   exploded: false,
   autoRotate: false,
+  showLabels: true,
+  showCombustion: false,
+  showAirflow: false,
+  showPrimer: true,
   resetViewKey: 0,
   setAngle: (angle) => {
     const nextAngle = Math.max(0, Math.min(719.9, angle));
@@ -55,15 +67,24 @@ export const useEngineStore = create<EngineState>((set) => ({
   toggleExploded: () => set((state) => ({ exploded: !state.exploded })),
   toggleAutoRotate: () =>
     set((state) => ({ autoRotate: !state.autoRotate })),
+  toggleLabels: () => set((state) => ({ showLabels: !state.showLabels })),
+  toggleCombustion: () =>
+    set((state) => ({ showCombustion: !state.showCombustion })),
+  toggleAirflow: () => set((state) => ({ showAirflow: !state.showAirflow })),
+  dismissPrimer: () => set({ showPrimer: false }),
   reset: () => {
     setPlayhead(INITIAL_ANGLE);
     set((state) => ({
       angle: INITIAL_ANGLE,
       playing: false,
-      selectedPart: "piston",
+      selectedPart: null,
       cutaway: true,
       exploded: false,
       autoRotate: false,
+      showLabels: true,
+      showCombustion: false,
+      showAirflow: false,
+      showPrimer: true,
       resetViewKey: state.resetViewKey + 1,
     }));
   },

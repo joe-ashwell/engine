@@ -11,7 +11,11 @@ export type PartId =
   | "crank-journal"
   | "counterweight"
   | "intake-manifold"
-  | "exhaust-manifold";
+  | "exhaust-manifold"
+  | "cylinder-head"
+  | "sump"
+  | "liners"
+  | "timing-gear";
 
 export type StrokeId = "intake" | "compression" | "power" | "exhaust";
 
@@ -156,6 +160,46 @@ export const engineParts: EnginePart[] = [
     fact: "Branch shape affects pressure waves and cylinder emptying.",
     colour: "#935239",
   },
+  {
+    id: "cylinder-head",
+    name: "Cylinder head",
+    shortName: "Head",
+    summary: "Closes the top of each cylinder and holds the valves.",
+    detail:
+      "The head forms the combustion chamber with the piston crown. Ports lead to the intake and exhaust valves.",
+    fact: "A real head often carries the camshafts and coolant passages.",
+    colour: "#3d4848",
+  },
+  {
+    id: "sump",
+    name: "Sump",
+    shortName: "Sump",
+    summary: "Forms the base of the crankcase and holds oil.",
+    detail:
+      "The sump bolts under the block and keeps oil around the crankshaft.",
+    fact: "Oil from the sump feeds the main and rod bearings.",
+    colour: "#292f30",
+  },
+  {
+    id: "liners",
+    name: "Cylinder liners",
+    shortName: "Liners",
+    summary: "Hard sleeves that form the piston bores.",
+    detail:
+      "Each liner guides a piston and takes the wear of the sliding rings.",
+    fact: "Worn liners can be replaced without a new block.",
+    colour: "#848a88",
+  },
+  {
+    id: "timing-gear",
+    name: "Timing gear",
+    shortName: "Timing gear",
+    summary: "Keeps the camshafts in time with the crankshaft.",
+    detail:
+      "The gear turns at half crank speed so each valve opens once per cycle.",
+    fact: "Wrong timing can make a valve hit a piston.",
+    colour: "#606464",
+  },
 ];
 
 export const strokes = [
@@ -164,24 +208,32 @@ export const strokes = [
     name: "Intake",
     range: "0–180°",
     summary: "Piston moves down. Intake valve opens and draws mixture in.",
+    detail:
+      "The piston moves down and lowers pressure in the cylinder. Fresh mixture enters through the open intake valve.",
   },
   {
     id: "compression",
     name: "Compression",
     range: "180–360°",
     summary: "Both valves close. The piston squeezes the mixture.",
+    detail:
+      "Both valves stay shut. The piston moves up and raises the pressure and temperature of the trapped mixture.",
   },
   {
     id: "power",
     name: "Power",
     range: "360–540°",
     summary: "The spark lights the mixture. Expanding gas drives the piston down.",
+    detail:
+      "The spark plug fires near the top of the stroke. Expanding gas drives the piston down and turns the crank.",
   },
   {
     id: "exhaust",
     name: "Exhaust",
     range: "540–720°",
     summary: "Exhaust valve opens. The piston pushes burnt gas out.",
+    detail:
+      "The exhaust valve opens. The piston moves up and drives burnt gas out through the exhaust path.",
   },
 ] as const;
 

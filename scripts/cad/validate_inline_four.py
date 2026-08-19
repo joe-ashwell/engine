@@ -85,6 +85,18 @@ def validate():
         failures.append("crank journal phases do not match the inline-four layout")
     if [offset % 360 for offset in firing_offsets] != phases:
         failures.append("firing offsets do not align with crank journals")
+    if dimensions.get("pistonPinAxis") != "x":
+        failures.append("piston and connecting-rod pin axes must align with the crankshaft")
+    if dimensions.get("timingGearTeeth", 0) < 16:
+        failures.append("timing gear must have a complete ring of teeth")
+    if dimensions.get("pistonPinRadius", 0) >= dimensions.get(
+        "rodSmallEndBoreRadius", 0
+    ):
+        failures.append("piston pin must fit inside the connecting-rod small end")
+    if dimensions.get("crankPinRadius", 0) >= dimensions.get(
+        "rodBigEndBoreRadius", 0
+    ):
+        failures.append("crank pin must fit inside the connecting-rod big end")
 
     if failures:
         raise SystemExit("Clearance check failed: " + ", ".join(failures))

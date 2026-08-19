@@ -1,13 +1,14 @@
 "use client";
 
-import { useGLTF } from "@react-three/drei";
+import { Outlines, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { CombustionEffects } from "@/components/scene/CombustionEffects";
 import { GasFlow } from "@/components/scene/GasFlow";
 import { Hotspot } from "@/components/scene/Hotspot";
 import { valveMotion } from "@/lib/engine-motion";
+import type { PartId } from "@/lib/content/engine";
 import manifest from "@/lib/generated/inline-four-manifest.json";
 import {
   getPlayhead,
@@ -95,6 +96,49 @@ const {
   valveClosedY,
   valveLift,
 } = manifest.dimensions;
+const GHOST_COLOUR = new THREE.Color("#e6e2d9");
+const SELECTED_COLOUR = new THREE.Color("#48675e");
+const PART_NODES: Record<PartId, CadNodeName[]> = {
+  piston: ["Piston"],
+  "connecting-rod": ["Rod"],
+  crankshaft: ["Crankshaft"],
+  "crank-journal": ["Crankshaft"],
+  counterweight: ["Crankshaft"],
+  "cylinder-block": ["BlockFull", "BlockCutaway"],
+  "cylinder-head": ["HeadFull", "HeadCutaway"],
+  sump: ["SumpFull", "SumpCutaway"],
+  liners: ["LinersFull", "LinersCutaway"],
+  "timing-gear": ["TimingGear"],
+  "intake-valve": ["IntakeValve"],
+  "exhaust-valve": ["ExhaustValve"],
+  "spark-plug": ["SparkPlug"],
+  camshaft: ["IntakeCamshaft", "ExhaustCamshaft"],
+  flywheel: ["Flywheel"],
+  "intake-manifold": ["IntakeManifold"],
+  "exhaust-manifold": ["ExhaustManifold"],
+};
+const MESH_PART: Partial<Record<CadNodeName, PartId>> = {
+  BlockFull: "cylinder-block",
+  BlockCutaway: "cylinder-block",
+  HeadFull: "cylinder-head",
+  HeadCutaway: "cylinder-head",
+  SumpFull: "sump",
+  SumpCutaway: "sump",
+  LinersFull: "liners",
+  LinersCutaway: "liners",
+  IntakeManifold: "intake-manifold",
+  ExhaustManifold: "exhaust-manifold",
+  Piston: "piston",
+  Rod: "connecting-rod",
+  Crankshaft: "crankshaft",
+  Flywheel: "flywheel",
+  IntakeValve: "intake-valve",
+  ExhaustValve: "exhaust-valve",
+  SparkPlug: "spark-plug",
+  IntakeCamshaft: "camshaft",
+  ExhaustCamshaft: "camshaft",
+  TimingGear: "timing-gear",
+};
 
 function dampPosition(
   group: THREE.Group | null,
@@ -131,8 +175,37 @@ function CadMesh({
   name: CadNodeName;
   visible?: boolean;
 }) {
+  const material = useRef<THREE.MeshStandardMaterial>(null);
   const node = nodes[name];
+  const baseColour = useMemo(() => new THREE.Color(CAD_COLOURS[name]), [name]);
+  const selectedPart = useEngineStore((state) => state.selectedPart);
+  const isolatedNodes = selectedPart ? PART_NODES[selectedPart] : null;
+  const isolated = !isolatedNodes || isolatedNodes.includes(name);
+  const selected = selectedPart !== null && isolated;
+
+  useFrame((_, rawDelta) => {
+    if (!material.current) return;
+    const delta = Math.min(rawDelta, 0.05);
+    material.current.color.lerp(
+      selected ? SELECTED_COLOUR : isolated ? baseColour : GHOST_COLOUR,
+      1 - Math.exp(-12 * delta),
+    );
+    material.current.metalness = THREE.MathUtils.damp(
+      material.current.metalness,
+      isolated ? 0.62 : 0,
+      12,
+      delta,
+    );
+    material.current.roughness = THREE.MathUtils.damp(
+      material.current.roughness,
+      isolated ? 0.31 : 1,
+      12,
+      delta,
+    );
+  });
+
   if (!node) return null;
+  const partId = MESH_PART[name];
   return (
     <mesh
       name={name}
@@ -145,12 +218,35 @@ function CadMesh({
       visible={visible}
       castShadow={SHADOW_CASTERS.has(name)}
       receiveShadow={SHADOW_RECEIVERS.has(name)}
+      onClick={(event) => {
+        if (!partId || !visible) return;
+        event.stopPropagation();
+        useEngineStore.getState().selectPart(partId);
+      }}
+      onPointerOver={(event) => {
+        if (!partId || !visible) return;
+        event.stopPropagation();
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "auto";
+      }}
     >
       <meshStandardMaterial
+        ref={material}
         color={CAD_COLOURS[name]}
         metalness={0.62}
         roughness={0.31}
+        opacity={1}
       />
+      {selected && (
+        <Outlines
+          color="#38544c"
+          thickness={0.018}
+          opacity={0.82}
+          transparent
+        />
+      )}
     </mesh>
   );
 }
@@ -159,6 +255,8 @@ export function Engine() {
   const { nodes } = useGLTF(manifest.model) as unknown as CadModel;
   const cutaway = useEngineStore((state) => state.cutaway);
   const exploded = useEngineStore((state) => state.exploded);
+  const showCombustion = useEngineStore((state) => state.showCombustion);
+  const showAirflow = useEngineStore((state) => state.showAirflow);
   const pistons = useRef<THREE.Group[]>([]);
   const rods = useRef<THREE.Group[]>([]);
   const intakeValves = useRef<THREE.Group[]>([]);
@@ -306,6 +404,7 @@ export function Engine() {
       <group ref={head}>
         <CadMesh nodes={nodes} name="HeadFull" visible={!cutaway} />
         <CadMesh nodes={nodes} name="HeadCutaway" visible={cutaway} />
+        <Hotspot partId="cylinder-head" position={[3.35, 2.35, 0.85]} />
         <CadMesh nodes={nodes} name="IntakeManifold" />
         <CadMesh nodes={nodes} name="ExhaustManifold" />
         <Hotspot
@@ -330,10 +429,12 @@ export function Engine() {
       <group ref={sump}>
         <CadMesh nodes={nodes} name="SumpFull" visible={!cutaway} />
         <CadMesh nodes={nodes} name="SumpCutaway" visible={cutaway} />
+        <Hotspot partId="sump" position={[3.35, -2.05, 0.85]} />
       </group>
       <group ref={liners}>
         <CadMesh nodes={nodes} name="LinersFull" visible={!cutaway} />
         <CadMesh nodes={nodes} name="LinersCutaway" visible={cutaway} />
+        <Hotspot partId="liners" position={[2.85, 1, 0.55]} />
       </group>
 
       {manifest.cylinderX.map((x, cylinder) => (
@@ -394,6 +495,10 @@ export function Engine() {
 
       <group ref={intakeCam}>
         <CadMesh nodes={nodes} name="IntakeCamshaft" />
+        <group position={[3.62, 0, 0]}>
+          <CadMesh nodes={nodes} name="TimingGear" />
+          <Hotspot partId="timing-gear" position={[0.18, 0.48, 0.22]} />
+        </group>
         <Hotspot partId="camshaft" position={[0, 0.25, 0.32]} />
       </group>
       <group ref={exhaustCam}>
@@ -427,12 +532,8 @@ export function Engine() {
         </group>
       ))}
 
-      {!exploded && (
-        <>
-          <CombustionEffects />
-          <GasFlow />
-        </>
-      )}
+      {!exploded && showCombustion && <CombustionEffects />}
+      {!exploded && showAirflow && <GasFlow />}
     </group>
   );
 }

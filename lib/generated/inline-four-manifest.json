@@ -11,7 +11,14 @@
     "deckY": 2.1,
     "valveClosedY": 2.5,
     "valveLift": 0.24,
-    "cylinderSpacing": 1.55
+    "cylinderSpacing": 1.55,
+    "timingGearTeeth": 20,
+    "pistonPinAxis": "x",
+    "pistonPinRadius": 0.085,
+    "pistonPinHoleRadius": 0.105,
+    "rodSmallEndBoreRadius": 0.095,
+    "crankPinRadius": 0.16,
+    "rodBigEndBoreRadius": 0.17
   },
   "cylinderX": [
     -2.325,
@@ -31,7 +38,7 @@
     540,
     360
   ],
-  "triangleCount": 86200,
+  "triangleCount": 86612,
   "hotspots": {
     "piston": [
       -2.325,

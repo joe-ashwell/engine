@@ -16,8 +16,11 @@ export function Hotspot({
 }) {
   const selectedPart = useEngineStore((state) => state.selectedPart);
   const selectPart = useEngineStore((state) => state.selectPart);
+  const showLabels = useEngineStore((state) => state.showLabels);
   const part = getPart(partId);
   const selected = selectedPart === partId;
+  const isolating = selectedPart !== null;
+  const showChrome = showLabels;
 
   if (!part) return null;
 
@@ -26,17 +29,22 @@ export function Hotspot({
       position={position}
       center
       distanceFactor={9}
-      occlude={alwaysVisible ? undefined : true}
-      zIndexRange={[40, 0]}
+      occlude={alwaysVisible || isolating ? undefined : true}
+      zIndexRange={[8, 0]}
       style={{ pointerEvents: "auto" }}
     >
       <button
         type="button"
-        className={`hotspot ${alwaysVisible ? "hotspot--always-visible" : ""} ${
-          selected ? "hotspot--selected" : ""
+        className={`hotspot ${
+          (alwaysVisible || isolating) && showChrome
+            ? "hotspot--always-visible"
+            : ""
+        } ${selected ? "hotspot--selected" : ""} ${
+          showChrome ? "" : "hotspot--labels-hidden"
         }`}
         aria-label={`Learn about the ${part.name}`}
         aria-pressed={selected}
+        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
           selectPart(partId);

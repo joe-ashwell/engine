@@ -58,9 +58,15 @@ export function Toolbar() {
   const cutaway = useEngineStore((state) => state.cutaway);
   const exploded = useEngineStore((state) => state.exploded);
   const autoRotate = useEngineStore((state) => state.autoRotate);
+  const showLabels = useEngineStore((state) => state.showLabels);
+  const showCombustion = useEngineStore((state) => state.showCombustion);
+  const showAirflow = useEngineStore((state) => state.showAirflow);
   const toggleCutaway = useEngineStore((state) => state.toggleCutaway);
   const toggleExploded = useEngineStore((state) => state.toggleExploded);
   const toggleAutoRotate = useEngineStore((state) => state.toggleAutoRotate);
+  const toggleLabels = useEngineStore((state) => state.toggleLabels);
+  const toggleCombustion = useEngineStore((state) => state.toggleCombustion);
+  const toggleAirflow = useEngineStore((state) => state.toggleAirflow);
   const reset = useEngineStore((state) => state.reset);
 
   return (
@@ -96,6 +102,33 @@ export function Toolbar() {
         <Icon>
           <path d="m12 3 5 3-5 3-5-3 5-3Z" />
           <path d="m7 11 5 3 5-3M7 16l5 3 5-3" />
+        </Icon>
+      </ToolButton>
+      <ToolButton label="Part labels" active={showLabels} onClick={toggleLabels}>
+        <Icon>
+          <path d="M4 7h9" />
+          <path d="M4 12h16" />
+          <path d="M4 17h7" />
+        </Icon>
+      </ToolButton>
+      <ToolButton
+        label="Combustion"
+        active={showCombustion}
+        onClick={toggleCombustion}
+      >
+        <Icon>
+          <path d="M12 21c3.6 0 5.5-2.4 5.5-5.2 0-3.4-2.7-5.2-2.7-8.8-1.8 1.7-2.8 4.3-2.8 4.3S11 8.6 9.2 7c0 4.3-2.7 6-2.7 8.8C6.5 18.6 8.4 21 12 21Z" />
+        </Icon>
+      </ToolButton>
+      <ToolButton
+        label="Air flow"
+        active={showAirflow}
+        onClick={toggleAirflow}
+      >
+        <Icon>
+          <path d="M3 8h11a2.5 2.5 0 1 0-2.5-2.5" />
+          <path d="M3 12h15a2.5 2.5 0 1 1-2.5 2.5" />
+          <path d="M3 16h8" />
         </Icon>
       </ToolButton>
       <span className="mx-1 h-5 w-px bg-black/10" aria-hidden="true" />

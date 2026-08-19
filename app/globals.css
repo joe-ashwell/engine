@@ -131,6 +131,12 @@ button {
   outline-offset: 2px;
 }
 
+.hotspot.hotspot--labels-hidden .hotspot__label,
+.hotspot.hotspot--labels-hidden .hotspot__leader {
+  opacity: 0;
+  transform: none;
+}
+
 .flow-label {
   display: block;
   border: 1px solid currentcolor;

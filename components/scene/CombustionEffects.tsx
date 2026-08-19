@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import manifest from "@/lib/generated/inline-four-manifest.json";
-import { getPlayhead } from "@/lib/store";
+import { getPlayhead, useEngineStore } from "@/lib/store";
 
 export function CombustionEffects() {
   const gasRefs = useRef<THREE.Mesh[]>([]);
@@ -70,7 +70,9 @@ export function CombustionEffects() {
         sparkActive ? 0.7 + Math.sin(localAngle * 2) * 0.18 : 0.001,
       );
       light.intensity = active && !reducedMotion ? fade * 4.5 : 0;
-      label.style.opacity = active && powerProgress < 0.55 ? "1" : "0";
+      const showLabels = useEngineStore.getState().showLabels;
+      label.style.opacity =
+        showLabels && active && powerProgress < 0.55 ? "1" : "0";
     });
   });
 
@@ -137,6 +139,7 @@ export function CombustionEffects() {
             position={[0, 2.86, 0]}
             center
             distanceFactor={9}
+            zIndexRange={[8, 0]}
             style={{ pointerEvents: "none" }}
           >
             <span
